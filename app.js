@@ -2,22 +2,27 @@ const express=require('express')
 const app=express()
 const path=require('path')
 const port=6060||process.env.PORT
-const expressLayouts = require('express-ejs-layouts')
-const exphbs=require('express-handlebars')
+const ejs = require('ejs')
+
+
+//static files
+app.use(express.static(path.join(__dirname,'./public')))
+
+
+//view engine
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs')
+app.set(express.static(path.join(__dirname, 'public')))
+
+//body Parser
+app.use(express.json())
+app.use(express.urlencoded({extended: false}))
 
 const indexRoute=require('./routes/home/index')
 const adminRoute=require('./routes/admin/admin')
 
 app.use('/',indexRoute)
 app.use('/admin',adminRoute)
-
-//static files
-app.use(express.static(path.join(__dirname,'./public')))
-
-//handlebars
-//my problem is here bro
-app.engine('handlebars',exphbs({defaultLayout:'home'}))
-app.set('view engine', 'handlebars')
 
 
 app.get('/',(req,res)=>{
