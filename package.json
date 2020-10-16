@@ -1,0 +1,21 @@
+{
+  "name": "cms-personal",
+  "version": "1.0.0",
+  "description": "\tCMS",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app"
+  },
+  "keywords": [
+    "cms"
+  ],
+  "author": "King Thrive",
+  "license": "ISC",
+  "dependencies": {
+    "ejs-layout": "^1.0.15",
+    "express": "^4.17.1",
+    "express-ejs-layouts": "^2.5.0",
+    "express-handlebars": "^5.1.0"
+  }
+}
