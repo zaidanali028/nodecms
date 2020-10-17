@@ -14,6 +14,9 @@ router.get('/register',(req,res)=>{
     res.render('home/register')
 })
 
+router.post('/register',(req,res)=>{
+     res.render('home/register')
+})
 router.get('/login',(req,res)=>{
     res.render('home/login')
 })

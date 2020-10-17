@@ -1,0 +1,51 @@
+<%-include('../layouts/admin_header.ejs')%>
+
+<h1>Create Posts</h1>
+
+
+<form action="/admin/posts/create" method="post">
+
+<!-- <form action="/admin/posts/create" method="post" enctype="multipart/form-data"> -->
+  <div class="form-group">
+    <label for="title">Title</label>
+      <input type="text" class="form-control" id="title" placeholder="Post Title" name="title"
+    />
+  </div>
+  <div class="form-group">
+    <label for="status">Status</label>
+    <select name="status" id="status" class="form-control">
+      <option value="public">Public</option>
+      <option value="private">Private</option>
+      <option value="draft">Draft</option>
+    </select>
+  </div>
+
+  <div class="form-check">
+    <label for="allowCOmments">
+      <input
+        name="allowComments"
+        type="checkbox"
+        class="form-check-input"
+        id="allowCOmments"
+      />
+      Allow Comments
+    </label>
+  </div>
+
+  <div class="form-group">
+    <label for="title">Description</label>
+    <textarea
+      name="description"
+      type="text"
+      class="form-control"
+      id="description"
+      placeholder="Description For Post"
+      rows="13"
+      cols="10"
+    ></textarea>
+  </div>
+  <button class="btn btn-outline-primary" type="submit">Create Post</button>
+</form>
+
+<%-include('../layouts/admin_footer.ejs')%>
+
