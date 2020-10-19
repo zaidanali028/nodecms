@@ -1,1 +1,13 @@
-<h1>All Posts</h1>
+<%-include('../layouts/admin_header.ejs')%>
+
+<h1>Fake Posts Generator</h1>
+<div class="row">
+    <form action="/admin/posts/dummy" method="POST">
+        <div class="form-group">
+            Number Of Posts Needed<input type="number" name="amount"class="form-control">
+        </div>
+        <button type="submit">Fire!</button>
+    </form>
+</div>
+
+<%-include('../layouts/admin_footer.ejs')%>

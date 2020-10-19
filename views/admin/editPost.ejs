@@ -1,0 +1,65 @@
+<%-include('../layouts/admin_header.ejs')%>
+
+<h1>Edit This Post</h1>
+
+<%const statusChecker=['public','private','draft'] %>
+
+
+<form action="/admin/posts/edit/<%=gotUser._id%>?_method=PUT" method="post">
+  <!-- <form action="/admin/posts/create" method="post" enctype="multipart/form-data"> -->
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input
+      type="text"
+      class="form-control"
+      id="title"
+      name="title"
+      value="<%=gotUser.title%>"
+    />
+  </div>
+  <div class="form-group">
+    <label for="status">Status</label>
+    <select name="status" id="status" class="form-control">
+      <option value="<%=gotUser.status%>"><%=gotUser.status.toUpperCase()%></option>
+      <%for(status of statusChecker){ %>
+           <% if(status===gotUser.status){%>
+           <%  continue%>
+      <%}%>
+      <option value="<%=status%>"><%=status.toUpperCase()%></option>
+
+      <%}%>
+
+    
+    </select>
+  </div>
+
+  <div class="form-check">
+    <label for="allowCOmments" class="form-check-label">
+      <input
+        name="allowComments"
+        type="checkbox"
+        <%if(gotUser.allowComments){%>
+      checked="checked" 
+      <% }%> 
+      class="form-check-input" id="allowCOmments" />
+      Allow Comments
+    </label>
+  </div>
+
+  <div class="form-group">
+    <label for="title">Description</label>
+    <textarea
+      name="description"
+      type="text"
+      class="form-control"
+      id="description"
+      rows="13"
+      cols="10">
+<%=gotUser.description%>"</textarea
+    >
+  </div>
+  <button class="btn btn-outline-primary" type="submit">Create Post</button>
+</form>
+<h1></h1>
+
+<%-include('../layouts/admin_footer.ejs')%>
