@@ -19,21 +19,34 @@ router.get("/create", (req, res) => {
 });
 
 router.post("/create", (req, res) => {
-  function isEmpty(object) {
-    //am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
-    for (let key in object) {
-      // console.log(key)
-      if (object.hasOwnProperty(key)) {
-        return true;
-      }
-      return false;
+
+  // function isEmpty(object) {
+  //  // am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
+  //   for (let key in object) {
+  //     if (object.hasOwnProperty(key)) {
+  //       return true;
+  //     }
+  //     return false;
+  //   }
+  // }
+
+
+  function isEmpty(object){
+    for (const key in object) {
+        if (object.hasOwnProperty(key)) {
+            return false;
+        }
     }
-  }
+    return true
+}
+
+
 
   const mainObject = req.files;
-  if (isEmpty(mainObject)) {
+  let fileName = "";
+  if (!isEmpty(mainObject)) {
     const fileObject = req.files.uploader;
-    const fileName = new Date().getSeconds()  +'-'+fileObject.name;
+    fileName = new Date().getSeconds()  +'-'+fileObject.name;
     //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
     fileObject.mv("./public/uploads/" + fileName, (err) => {
       if (err) throw err;
@@ -59,12 +72,15 @@ router.post("/create", (req, res) => {
     status,
     allowComments,
     description,
-    uploader: fileNamer
+    uploader: fileName
   });
-  newPost.save().then((newPostSaved) => {
+  newPost.save().then(() => {
     res.redirect("/admin/posts");
   })
 });
+
+
+
 
 router.get("/edit/:id", (req, res) => {
   const { id } = req.params;
