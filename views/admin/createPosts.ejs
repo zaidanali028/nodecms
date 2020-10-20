@@ -2,14 +2,15 @@
 
 <h1>Create Posts</h1>
 
-
-<form action="/admin/posts/create" method="post">
-
-<!-- <form action="/admin/posts/create" method="post" enctype="multipart/form-data"> -->
+<form action="/admin/posts/create" method="post" enctype="multipart/form-data">
   <div class="form-group">
     <label for="title">Title</label>
       <input type="text" class="form-control" id="title" placeholder="Post Title" name="title"
     />
+  </div>
+  <div class="form-group">
+    <label for="upload">Upload A Picture</label>
+      <input type="file" class="form-control-file" id="title" name="uploader" />
   </div>
   <div class="form-group">
     <label for="status">Status</label>

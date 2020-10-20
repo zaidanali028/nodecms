@@ -1,7 +1,7 @@
 const express = require("express");
 const Postschema = require("../../models/Posts");
 const router = express.Router();
-const faker = require("faker");
+const faker = require("faker")
 //Schema
 const postSchema = require("../../models/Posts");
 
@@ -19,8 +19,35 @@ router.get("/create", (req, res) => {
 });
 
 router.post("/create", (req, res) => {
-  const { title, status, description } = req.body;
+  function isEmpty(object) {
+    //am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
+    for (let key in object) {
+      // console.log(key)
+      if (object.hasOwnProperty(key)) {
+        return true;
+      }
+      return false;
+    }
+  }
 
+  const mainObject = req.files;
+  if (isEmpty(mainObject)) {
+    const fileObject = req.files.uploader;
+    const fileName = new Date().getSeconds()  +'-'+fileObject.name;
+    //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
+    fileObject.mv("./public/uploads/" + fileName, (err) => {
+      if (err) throw err;
+      console.log("has something");
+    });
+  } else {
+    res.redirect('/admin/posts/create')
+    //if the form is not having a picture,I redirect to the same directory
+    console.log("Has nothing");
+  }
+
+  const { title, status, description } = req.body;
+  let { allowComments } = req.body;
+   let fileNamer = req.files.uploader.name;
   //handling allowcomments(if is on,we will overwrite on with true and false otherwise)
   if (allowComments) {
     allowComments = true;
@@ -32,10 +59,11 @@ router.post("/create", (req, res) => {
     status,
     allowComments,
     description,
+    uploader: fileNamer
   });
   newPost.save().then((newPostSaved) => {
     res.redirect("/admin/posts");
-  });
+  })
 });
 
 router.get("/edit/:id", (req, res) => {
@@ -85,7 +113,7 @@ router.get("/dummy", (req, res) => {
 });
 
 router.post("/dummy", (req, res) => {
-        for (let i = 0; i < req.body.amount; i++) {
+  for (let i = 0; i < req.body.amount; i++) {
     const fakePost = new postSchema({
       title: faker.name.title(),
       status: "private",
