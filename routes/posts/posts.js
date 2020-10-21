@@ -77,7 +77,7 @@ router.get("/edit/:id", (req, res) => {
 
 router.put("/edit/:id", (req, res) => {
   const { id } = req.params;
-  let { title, status, description } = req.body;
+  let { title, status,allowComments } = req.body;
   if (allowComments) {
     allowComments = true;
   } else {
