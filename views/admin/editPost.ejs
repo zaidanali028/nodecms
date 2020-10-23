@@ -1,12 +1,22 @@
 <%-include('../layouts/admin_header.ejs')%>
-
+<%- include('../layouts/flashes.ejs')%>
 <h1>Edit This Post</h1>
 
 <%const statusChecker=['public','private','draft'] %>
+<%const categoryChecker=['public','private','draft'] %>
 
+<% if (typeof errors !='undefined') {%>
+  <% errors.forEach(error=>{%>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <h2>  <%=  error.msg %> </h2>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <% }) %>
+  <%}%>
 
-<form action="/admin/posts/edit/<%=gotUser._id%>?_method=PUT" method="post">
-  <!-- <form action="/admin/posts/create" method="post" enctype="multipart/form-data"> -->
+<form action="/admin/posts/edit/<%=gotPost._id%>?_method=PUT" method="post" enctype="multipart/form-data">
   <div class="form-group">
     <label for="title">Title</label>
     <input
@@ -14,15 +24,30 @@
       class="form-control"
       id="title"
       name="title"
-      value="<%=gotUser.title%>"
+      value="<%=gotPost.title%>"
     />
   </div>
   <div class="form-group">
+    <label for="upload">Upload A Picture</label>
+      <input type="file" class="form-control-file" id="title" name="uploader"  />
+      <img src="/uploads/<%=gotPost.uploader%>" width="180" height="180" alt="">
+  </div>
+  <div class="form-group">
+    <label for="status">Category</label>
+  <select name="category" id="status" class="form-control">
+  <%cateGories.forEach(category=>{%>
+<option value="<%=category.id%>"><%=category.name%></option>
+    <%  })%>
+
+  </select>
+    </div>
+  
+  <div class="form-group">
     <label for="status">Status</label>
     <select name="status" id="status" class="form-control">
-      <option value="<%=gotUser.status%>"><%=gotUser.status.toUpperCase()%></option>
+      <option value="<%=gotPost.status%>"><%=gotPost.status.toUpperCase()%></option>
       <%for(status of statusChecker){ %>
-           <% if(status===gotUser.status){%>
+           <% if(status===gotPost.status){%>
            <%  continue%>
       <%}%>
       <option value="<%=status%>"><%=status.toUpperCase()%></option>
@@ -38,7 +63,7 @@
       <input
         name="allowComments"
         type="checkbox"
-        <%if(gotUser.allowComments){%>
+        <%if(gotPost.allowComments){%>
       checked="checked" 
       <% }%> 
       class="form-check-input" id="allowCOmments" />
@@ -55,10 +80,10 @@
       id="description"
       rows="13"
       cols="10">
-<%=gotUser.description%>"</textarea
+<%=gotPost.description%>"</textarea
     >
   </div>
-  <button class="btn btn-outline-primary" type="submit">Create Post</button>
+  <button class="btn btn-outline-primary" type="submit">Edit Post</button>
 </form>
 <h1></h1>
 

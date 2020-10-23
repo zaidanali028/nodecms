@@ -21,8 +21,16 @@ const postSchema=new mongoose.Schema({
     uploader:{
         type:String,
        
+    },
+    date:{
+        type:Date,
+        default:new Date
+    },
+    //This is a reference id of category from the category model
+    category:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'cateory'
     }
-
 
 
 

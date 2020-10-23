@@ -1,0 +1,10 @@
+Leave these for now
+1.Cannot handle empty picture validation 
+2.Cannot delete/unlink picture yet
+3.Cannot edit an already existing picture (Solved)
+4.Cannot handle an empty picture of an edited post of a user
+5.Cannot format date,tried doing it without helpers but it did not work
+
+1.After I send a post request to /create,i get an error.Everything seems to be ok too
+2.I cannot get the category name from the Category schema at admim/index line 24
+

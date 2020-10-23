@@ -1,66 +1,87 @@
 const express = require("express");
 const Postschema = require("../../models/Posts");
 const router = express.Router();
-const faker = require("faker")
-//Schema
+const faker = require("faker");
+const moment=require('moment')
+//Schemas
 const postSchema = require("../../models/Posts");
+const Category= require("../../models/Category");
 
 router.get("/", (req, res) => {
-  postSchema.find({}).then((posts) => {
+  
+  postSchema.find({})
+ .populate('category')
+   //You can get category collection without populating it but it wont be an object
+  //Inorder to make it an object and get its name to the user,
+  //I will have to populate its collection
+  .then((posts) => {
+    console.log(posts)
     res.render("admin/index", {
-      allPosts: posts,
-    });
+      allPosts: posts });
   });
 });
 
 router.get("/create", (req, res) => {
-  res.render("admin/createPosts");
-  // res.send('create posts route on fire')
+  Category.find({}).then(category=>{
+    res.render("admin/createPosts",{
+      cateGories:category
+    });
+
+
+  })
+  
+
 });
 
-router.post("/create", (req, res) => {
+router.post("/create", async (req, res) => {
+  
+  let errors = [];
+  const { title, status, description } = req.body;
+  let { allowComments } = req.body;
+  let fileName = "";
+  let category=req.body.category
+  if (!title || !status || !description) {
+    errors.push({ msg: "Please fill in All Fields" });
+  }
+  if (description.length < 11210) {
+    errors.push({ msg: "Description must be more than 10" });
+  }
 
-  // function isEmpty(object) {
-  //  // am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
-  //   for (let key in object) {
-  //     if (object.hasOwnProperty(key)) {
-  //       return true;
-  //     }
-  //     return false;
-  //   }
-  // }
+  if (errors.length > 0) {
+    res.render("admin/createPosts", {
+      errors,
+      title,
+      description,
+    });
+  }
 
-
-  function isEmpty(object){
-    for (const key in object) {
-        if (object.hasOwnProperty(key)) {
-            return false;
-        }
+  function isEmpty(object) {
+    //am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
+    for (let key in object) {
+      // console.log(key)
+      if (object.hasOwnProperty(key)) {
+        return true;
+      }
+      return false;
     }
-    return true
-}
-
-
+  }
 
   const mainObject = req.files;
-  let fileName = "";
-  if (!isEmpty(mainObject)) {
+  if (isEmpty(mainObject)) {
     const fileObject = req.files.uploader;
-    fileName = new Date().getSeconds()  +'-'+fileObject.name;
+    fileName = new Date().getSeconds() + "-" + fileObject.name;
     //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
     fileObject.mv("./public/uploads/" + fileName, (err) => {
       if (err) throw err;
       console.log("has something");
     });
   } else {
-    res.redirect('/admin/posts/create')
+    req.flash("error_msg", "Please insert an image before proceeding");
+    res.redirect("/admin/posts/create");
     //if the form is not having a picture,I redirect to the same directory
     console.log("Has nothing");
   }
 
-  const { title, status, description } = req.body;
-  let { allowComments } = req.body;
-   let fileNamer = req.files.uploader.name;
   //handling allowcomments(if is on,we will overwrite on with true and false otherwise)
   if (allowComments) {
     allowComments = true;
@@ -70,34 +91,86 @@ router.post("/create", (req, res) => {
   const newPost = new postSchema({
     title,
     status,
+    category:category,
     allowComments,
     description,
-    uploader: fileName
+    uploader: fileName,
   });
-  newPost.save().then(() => {
+  newPost.save().then((newPostSaved) => {
+    req.flash(
+      "success_msg",
+      `Successfuly created post with title ${newPostSaved.title}`
+    );
     res.redirect("/admin/posts");
-  })
+  });
 });
-
-
-
 
 router.get("/edit/:id", (req, res) => {
   const { id } = req.params;
-  postSchema.findOne({ _id: id }).then((userFound) => {
-    res.render("admin/editPost", {
-      gotUser: userFound,
-    });
+  postSchema.findOne({ _id: id }).then((postFound) => {
+    Category.find({}).then(category=>{
+      res.render("admin/editPost",{gotPost: postFound,cateGories:category});
+     
+  
+  
+    })
+ 
   });
 });
 
 router.put("/edit/:id", (req, res) => {
-  const { id } = req.params;
-  let { title, status,allowComments } = req.body;
+  let errors = [];
+  const { title, status, description } = req.body;
+  let { allowComments } = req.body;
+  let category=req.body.category
+  let { id } = req.params;
+  if (!title || !status || !description) {
+    errors.push({ msg: "Please fill in All Fields" });
+  }
+  if (description.length < 10) {
+    errors.push({ msg: "Description must be more than 10" });
+  }
+
+  if (errors.length > 0) {
+    res.render("admin/createPosts", {
+      errors,
+      title,
+      description,
+    });
+  }
+
   if (allowComments) {
     allowComments = true;
   } else {
     allowComments = false;
+  }
+
+  function isEmpty(object) {
+    //am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
+    for (let key in object) {
+      // console.log(key)
+      if (object.hasOwnProperty(key)) {
+        return true;
+      }
+      return false;
+    }
+  }
+
+  const mainObject = req.files;
+  if (isEmpty(mainObject)) {
+    const fileObject = req.files.uploader;
+    fileName = new Date().getSeconds() + "-" + fileObject.name;
+    //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
+    fileObject.mv("./public/uploads/" + fileName, (err) => {
+      if (err) throw err;
+      console.log("has something");
+    });
+  } else {
+    req.flash("error_msg", "Please insert an image before proceeding");
+
+    res.redirect("/admin/posts/edit/:id");
+    //if the form is not having a picture,I redirect to the same directory
+    console.log("Has nothing");
   }
 
   Postschema.findByIdAndUpdate(
@@ -105,12 +178,15 @@ router.put("/edit/:id", (req, res) => {
     {
       $set: {
         title: title,
+        uploader: fileName,
+        category:category,
         status: status,
         allowcomments: allowComments,
         description: description,
-      },
+      }
     }
   ).then((updatedPost) => {
+    req.flash("success_msg", "Successfully Updated Your Post");
     res.redirect("/admin/posts");
   });
 });
@@ -119,6 +195,7 @@ router.delete("/delete/:id", (req, res) => {
   const { id } = req.params;
   postSchema.findByIdAndDelete({ _id: id }).then((thePosts) => {
     thePosts.remove();
+    req.flash('success_msg',`Successfully deleted post with id ${thePosts.id}`)
     res.redirect("/admin/posts");
   });
 });
@@ -139,6 +216,8 @@ router.post("/dummy", (req, res) => {
     fakePost
       .save()
       .then((faked) => {
+    req.flash('success_msg',`Successfully auto posted ${req.body.amount} posts`)
+
         res.redirect("/admin/posts");
       })
       .catch((err) => {
@@ -158,6 +237,8 @@ router.delete("/clear", (req, res) => {
         gottenPost.remove();
       });
     }
+    req.flash('success_msg',`Successfully deleted all posts`)
+
     res.redirect("/admin/posts");
   });
 });

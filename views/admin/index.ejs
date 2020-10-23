@@ -1,6 +1,7 @@
 <%-include('../layouts/admin_header.ejs')%>
-
 <h1>All Posts</h1>
+<%-include('../layouts/flashes.ejs')%>
+
 <% allPosts.forEach(function(post){ %>
 <table class="table table-bordered">
 <thead>
@@ -8,17 +9,24 @@
   <th>Id</th>
   <th>Title</th>
   <th>Post's Picture</th>
-  <th>Status</th>
+  <th>Category</th>
+ <th>Status</th>
   <th>Allow Comments</th>
+  <th>Date</th>
+
 </tr>
 </thead>
 <tbody>
   <tr>
      <td><%=post.id%></td>
      <td><%=post.title%></td>
-     <td><img src="/uploads/" width="150px" height="90px" alt=""></td>
+     <td><img src="/uploads/<%=post.uploader%>" width="150px" height="90px" alt=""></td>
+     <td><%=post.category%></td>
      <td><%=post.status%></td>
+  
      <td><%=post.allowComments%></td>
+     <td><%=post.date%></td>
+
      <td> <a class="btn btn-outline-primary" href="/admin/posts/edit/<%=post.id%>">Edit Post </a></td>
      <td> 
        <form action="/admin/posts/delete/<%=post._id%>?_method=DELETE" method="POST">
