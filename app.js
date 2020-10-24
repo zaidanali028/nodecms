@@ -9,7 +9,7 @@ const uploader=require('express-fileupload')
 const flash =require('connect-flash')
 const session=require('express-session')
 //db connection
-mongoose.connect("mongodb://localhost:27017/mycms")
+mongoose.connect("mongodb://localhost:27017/mycms", {useNewUrlParser: true, useUnifiedTopology: true})
   .then((connected) => {
     console.log("db connected");
   })

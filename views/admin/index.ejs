@@ -2,7 +2,7 @@
 <h1>All Posts</h1>
 <%-include('../layouts/flashes.ejs')%>
 
-<% allPosts.forEach(function(post){ %>
+
 <table class="table table-bordered">
 <thead>
   <tr>
@@ -17,15 +17,28 @@
 </tr>
 </thead>
 <tbody>
+
+<% allPosts.forEach(function(post){ %>
+
   <tr>
      <td><%=post.id%></td>
      <td><%=post.title%></td>
-     <td><img src="/uploads/<%=post.uploader%>" width="150px" height="90px" alt=""></td>
-     <td><%=post.category%></td>
+     <td>
+         <% if (post.uploader){ %>
+         <img src="/uploads/<%=post.uploader%>" width="60px" height="60px" alt="">
+
+        <% } else { %>
+             No Image
+       <% } %>
+
+
+
+     </td>
+     <td><%=post.category.name%></td>
      <td><%=post.status%></td>
   
      <td><%=post.allowComments%></td>
-     <td><%=post.date%></td>
+     <td><%=  new Date(post.date).toDateString() %></td>
 
      <td> <a class="btn btn-outline-primary" href="/admin/posts/edit/<%=post.id%>">Edit Post </a></td>
      <td> 
@@ -36,10 +49,12 @@
 
   </tr>
 
+<% }) %>
+
 </tbody>
 </table>
 
-<% }) %>
+
 <table>
   <tbody>
     <tr>
