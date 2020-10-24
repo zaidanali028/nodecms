@@ -29,12 +29,17 @@ const postSchema=new mongoose.Schema({
     //This is a reference id of category from the category model
     category:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'cateory'
-    }
+        ref:'category'
+    },
+//The comment has to be an array because there will be multiple comments on posts
+    comments:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'comments'
+    }]
+
+ //The {usePushEach:true} allow us to push to the comments array
+
+},{usePushEach:true})
 
 
-
-})
-
-const Postschema=mongoose.model('currentPosts',postSchema)
-module.exports=Postschema
+module.exports=mongoose.model('currentPosts',postSchema)

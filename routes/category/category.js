@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Category = require("../../models/Category");
+const {ensureAuthenticated}=require('../../config/auth')
 
 //Read
-router.get("/", (req, res) => {
+router.get("/",ensureAuthenticated, (req, res) => {
   Category.find({}).lean().then((allCtegories) => {
     res.render("category/category", {
       postCategories: allCtegories,
@@ -13,7 +14,7 @@ router.get("/", (req, res) => {
 });
 
 //Create
-router.post("/", (req, res) => {
+router.post("/",ensureAuthenticated, (req, res) => {
   const { name } = req.body;
   const newCategory = new Category({
     name,
@@ -24,7 +25,7 @@ router.post("/", (req, res) => {
 });
 
 //Update
-router.put("/edit/:id", (req, res) => {
+router.put("/edit/:id", ensureAuthenticated,(req, res) => {
   const { name } = req.body;
   const { id } = req.params;
   Category.findByIdAndUpdate(
@@ -39,7 +40,7 @@ router.put("/edit/:id", (req, res) => {
   });
 });
 
-router.get("/edit/:id", (req, res) => {
+router.get("/edit/:id",ensureAuthenticated, (req, res) => {
   const { id } = req.params;
   Category.findOne({ _id: id }).then((category) => {
     res.render("category/editCategory", {
@@ -48,7 +49,7 @@ router.get("/edit/:id", (req, res) => {
   });
 });
 
-router.delete("/delete/:id", (req, res) => {
+router.delete("/delete/:id", ensureAuthenticated,(req, res) => {
   const { id } = req.params;
   Category.findByIdAndDelete({ _id: id }).then((category) => {
     res.redirect("/admin/category/");

@@ -8,11 +8,15 @@ const path = require('path')
 const postSchema = require("../../models/Posts");
 const Category= require("../../models/Category");
 
-const uploadDir = path.join(__dirname, '../../public/uploads/')
+//Chedcking authentication
+const {ensureAuthenticated}=require('../../config/auth')
 
-router.get("/", (req, res) => {
+
+router.get("/",ensureAuthenticated, (req, res) => {
   
   postSchema.find({})
+  //.lean() changes a mongoose object to a plain javascript object so I can use dot(.) notation on them
+.lean()
  .populate('category')
    //You can get category collection without populating it but it wont be an object
   //Inorder to make it an object and get its name to the user,
@@ -23,7 +27,7 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/create", (req, res) => {
+router.get("/create",ensureAuthenticated, (req, res) => {
 
   Category.find({}).lean().then(cateGories=>{
     res.render("admin/createPosts",{cateGories});
@@ -32,10 +36,11 @@ router.get("/create", (req, res) => {
 
 });
 
-router.post("/create", async (req, res) => {
+router.post("/create", ensureAuthenticated,async (req, res) => {
   
   let errors = [];
   const { title, status, description, category } = req.body;
+  let {allowComments}=req.body
 
   if (!title || !status || !description) {
     errors.push({ msg: "Please fill in All Fields" });
@@ -65,25 +70,33 @@ router.post("/create", async (req, res) => {
     for (let key in object) {
       // console.log(key)
       if (object.hasOwnProperty(key)) {
-        return false;
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   let fileName = '';
-  if (!isEmpty(req.files)) {
+  if (isEmpty(req.files)) {
     const fileObject = req.files.uploader;
     fileName = new Date().getSeconds() + "-" + fileObject.name;
     //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
-    fileObject.mv(uploadDir + fileName, (err) => {
-      if(err) console.log(err);
+    fileObject.mv('./public/uploads/' + fileName, (err) => {
+      if(err)  console.log(err);
       console.log("has something");
     });
+  }else{
+    console.log("has nothing");
+
   }
 
   //handling allowComments(if is on,we will overwrite on with true and false otherwise)
-  let allowComments = !!req.body.allowComments;
+if(allowComments){
+  allowComments=true
+}else{
+  allowComments=false
+
+}
 
   const newPost = new postSchema({
     title,
@@ -102,7 +115,7 @@ router.post("/create", async (req, res) => {
   });
 });
 
-router.get("/edit/:id", (req, res) => {
+router.get("/edit/:id",ensureAuthenticated, (req, res) => {
   const { id } = req.params;
   postSchema.findOne({ _id: id }).then((postFound) => {
     Category.find({}).then(category=>{
@@ -115,7 +128,7 @@ router.get("/edit/:id", (req, res) => {
   });
 });
 
-router.put("/edit/:id", (req, res) => {
+router.put("/edit/:id",ensureAuthenticated, (req, res) => {
   let errors = [];
   const { title, status, description } = req.body;
   let { allowComments } = req.body;
@@ -188,7 +201,7 @@ router.put("/edit/:id", (req, res) => {
   });
 });
 
-router.delete("/delete/:id", (req, res) => {
+router.delete("/delete/:id", ensureAuthenticated,(req, res) => {
   const { id } = req.params;
   postSchema.findByIdAndDelete({ _id: id }).then((thePosts) => {
     thePosts.remove();
@@ -198,11 +211,11 @@ router.delete("/delete/:id", (req, res) => {
 });
 
 //dummpy data
-router.get("/dummy", (req, res) => {
+router.get("/dummy",ensureAuthenticated, (req, res) => {
   res.render("admin/allPosts");
 });
 
-router.post("/dummy", (req, res) => {
+router.post("/dummy",ensureAuthenticated, (req, res) => {
   for (let i = 0; i < req.body.amount; i++) {
     const fakePost = new postSchema({
       title: faker.name.title(),
@@ -223,7 +236,7 @@ router.post("/dummy", (req, res) => {
   }
 });
 
-router.delete("/clear", (req, res) => {
+router.delete("/clear",ensureAuthenticated, (req, res) => {
   //find{} finds all posts
   postSchema.find({}).then((allposts) => {
     //allposts are all posts in the database

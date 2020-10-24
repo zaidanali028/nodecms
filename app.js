@@ -8,8 +8,18 @@ const mongoose = require("mongoose");
 const uploader=require('express-fileupload')
 const flash =require('connect-flash')
 const session=require('express-session')
+// const {dbUrl}=require('./config/keys')
+ const db=require('./config/keys')
+ const dbUrI=db.dbUrl
+
+ //passport-module
+const passport=require('passport')
+//passport config
+require('./config/passport')(passport)
+//the(passport)argument is what the ./config/passport module is going to use in authenticating user
+
 //db connection
-mongoose.connect("mongodb://localhost:27017/mycms", {useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect(dbUrI, {useNewUrlParser: true, useUnifiedTopology: true})
   .then((connected) => {
     console.log("db connected");
   })
@@ -35,7 +45,9 @@ app.use(session({
   //cookie: { secure: true }
 }))
 
-//This
+  //This should alwayse between session and flash
+  app.use(passport.initialize());
+  app.use(passport.session());
 
 //view engine
 app.set("views", path.join(__dirname, "views"));
@@ -50,11 +62,16 @@ const indexRoute = require("./routes/home/index");
 const adminRoute = require("./routes/admin/admin");
 const postsRoute = require("./routes/posts/posts");
 const categoryRoute = require("./routes/category/category");
+const commentRoute = require("./routes/comments/comment");
+
+const { dbUrl } = require("./config/keys");
 
 //declaring local variables for displaying FLASH messages
 app.use((req,res,next)=>{
   res.locals.success_msg=req.flash('success_msg')
   res.locals.error_msg=req.flash('error_msg')
+  res.locals.error=req.flash('error')
+
   next()
 })
 
@@ -62,6 +79,7 @@ app.use("/", indexRoute);
 app.use("/admin", adminRoute);
 app.use("/admin/posts", postsRoute);
 app.use("/admin/category", categoryRoute);
+app.use('/user/comment',commentRoute)
 
 app.listen(port, () => {
   console.log(`server running on port ${port}`);

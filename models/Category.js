@@ -1,7 +1,7 @@
 const { date } = require("faker");
 const mongoose = require("mongoose");
 
-const postSchema = new mongoose.Schema({
+const categorySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -13,5 +13,4 @@ const postSchema = new mongoose.Schema({
 
 });
 
-const Categorychema = mongoose.model("cateory", postSchema);
-module.exports = Categorychema;
+module.exports=mongoose.model('category',categorySchema)
