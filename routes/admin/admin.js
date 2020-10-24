@@ -1,18 +1,20 @@
 const express = require("express");
 const router = express.Router();
 
-// you do not need to overwrite default layout
-
-// router.all("/*", (req, res, next) => {
-//   req.app.locals.layout = "admin";
-//   next() 
-// }); 
-
+const postSchema = require('../../models/Posts');
 
 
 
 router.get('/', (req, res) => {
-  res.render("admin/index");
+  postSchema.find({})
+      .populate('category')
+      //You can get category collection without populating it but it wont be an object
+      //Inorder to make it an object and get its name to the user,
+      //I will have to populate its collection
+      .then((posts) => {
+        res.render("admin/index", {
+          allPosts: posts });
+      });
 });
 
 router.get('/dashboard',(req,res)=>{

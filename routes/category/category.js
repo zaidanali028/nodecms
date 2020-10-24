@@ -4,7 +4,7 @@ const Category = require("../../models/Category");
 
 //Read
 router.get("/", (req, res) => {
-  Category.find({}).then((allCtegories) => {
+  Category.find({}).lean().then((allCtegories) => {
     res.render("category/category", {
       postCategories: allCtegories,
       
