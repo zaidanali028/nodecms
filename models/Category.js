@@ -1,4 +1,3 @@
-const { date } = require("faker");
 const mongoose = require("mongoose");
 
 const categorySchema = new mongoose.Schema({

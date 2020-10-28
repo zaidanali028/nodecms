@@ -5,9 +5,11 @@ const bcrypt = require("bcryptjs");
 const postSchema = require("../../models/Posts");
 const Category = require("../../models/Category");
 const newUser = require("../../models/User");
+const Comment=require('../../models/Comments')
 
 //Passport-auth
-const passport=require('passport')
+const passport=require('passport');
+const { populate } = require("../../models/Posts");
 
 router.get("/", (req, res) => {
   postSchema.find({}).then((foundPosts) => {
@@ -20,14 +22,14 @@ router.get("/", (req, res) => {
   });
 });
 router.get("/post/:id", (req, res) => {
-  // postSchema.findOne({_id:id})
-  // .then(singlePost=>{
-  //     res.render('home/post',{
-  //         post:singlePost
-  //     })
-  // })
-  const { id } = req.params;
-  postSchema.findOne({ _id: id }).then((singlePost) => {
+const { id } = req.params;
+  postSchema.findOne({ _id: id })
+  .populate('postOwner')
+  ///?
+  .populate({path:'comments',populate:{path:'user',model:'users'}})
+  
+  .then((singlePost) => {
+   //console.log(singlePost.comments);
     Category.find({}).then((foundCategory) => {
       res.render("home/post", {
         post: singlePost,

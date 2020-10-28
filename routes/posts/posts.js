@@ -40,6 +40,7 @@ router.post("/create", ensureAuthenticated,async (req, res) => {
   
   let errors = [];
   const { title, status, description, category } = req.body;
+  //console.log(category)
   let {allowComments}=req.body
 
   if (!title || !status || !description) {
@@ -104,7 +105,8 @@ if(allowComments){
     category,
     allowComments,
     description,
-    uploader: fileName
+    uploader: fileName,
+    postOwner:req.user._id
   });
   await newPost.save().then((newPostSaved) => {
     req.flash(
@@ -193,6 +195,8 @@ router.put("/edit/:id",ensureAuthenticated, (req, res) => {
         status: status,
         allowcomments: allowComments,
         description: description,
+        postOwner:req.user._id
+
       }
     }
   ).then((updatedPost) => {
@@ -203,7 +207,22 @@ router.put("/edit/:id",ensureAuthenticated, (req, res) => {
 
 router.delete("/delete/:id", ensureAuthenticated,(req, res) => {
   const { id } = req.params;
-  postSchema.findByIdAndDelete({ _id: id }).then((thePosts) => {
+   postSchema.findOne({ _id: id }).populate('comments')
+  //I will like to delete the post I want to delete's comment too
+  //so i populated the 'comments on the found post'
+   
+   .then((thePosts) => {
+    // console.log(thePosts.comments)
+    //logged it.Is an array
+    if(thePosts.comments.length!=0){
+      // if the array is not empty
+      // console.log(thePosts.comments)
+
+      for(comment of thePosts.comments){
+        comment.remove()
+      }
+
+    }
     thePosts.remove();
     req.flash('success_msg',`Successfully deleted post with id ${thePosts.id}`)
     res.redirect("/admin/posts");
@@ -222,6 +241,7 @@ router.post("/dummy",ensureAuthenticated, (req, res) => {
       status: "private",
       allowComments: faker.random.boolean(),
       description: faker.lorem.sentences(),
+    
     });
     fakePost
       .save()

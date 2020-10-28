@@ -3,6 +3,8 @@ const router = express.Router();
 const Post = require("../../models/Posts");
 const Comment = require("../../models/Comments");
 
+const {ensureAuthenticated} = require('../../config/auth')
+
 router.post("/:id", (req, res) => {
   //NOTE:A USER MUST LOGIN BEFORE HAVING ACCESS TO PASSPORT'S  req.user object
   //A user want to comment :What to do?
@@ -13,13 +15,15 @@ router.post("/:id", (req, res) => {
   Post.findOne({ _id: id }).then((post) => {
     //3.After finding user,Lets push comment to that user's model
     // console.log(post)
+    const loggedinUser=req.user._id
+ 
     const newComment = new Comment({
       body,
-      user: req.user._id,
-      //the user key takes a value of req.user.id from passport,so we can reference the user who maade the comment
+      user: loggedinUser,
+      //the user key takes a value of req.user.id from passport,so we can reference the user who made the comment
     });
     post.comments.push(newComment);
-   // console.log(newComment)
+    //console.log(newComment)
     //on line 21,the gotten post by id has a comment property which is an array
     //and am pushing the new comment to that array
     post.save()
@@ -28,9 +32,22 @@ router.post("/:id", (req, res) => {
          // saving our comment with the user who commented id
         newComment.save()
         .then((savedComment) => {
+           // console.log(savedComment)
           res.redirect(`/post/${post.id}`);
         });
       });
   });
 });
+
+router.delete('/delete/:id',(req,res)=>{
+      const {id}=req.params
+      Comment.findOne({_id:id})
+      .then(commentFound=>{
+        commentFound.remove()
+        req.flash('success_msg','Successfully deleted comment')
+        res.redirect('/admin/comment')
+      })
+  
+
+})
 module.exports = router;

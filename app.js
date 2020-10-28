@@ -63,7 +63,7 @@ const adminRoute = require("./routes/admin/admin");
 const postsRoute = require("./routes/posts/posts");
 const categoryRoute = require("./routes/category/category");
 const commentRoute = require("./routes/comments/comment");
-
+const userPost=require('./routes/userposts/post')
 const { dbUrl } = require("./config/keys");
 
 //declaring local variables for displaying FLASH messages
@@ -80,7 +80,7 @@ app.use("/admin", adminRoute);
 app.use("/admin/posts", postsRoute);
 app.use("/admin/category", categoryRoute);
 app.use('/user/comment',commentRoute)
-
+app.use('/user/post',userPost)
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
 });

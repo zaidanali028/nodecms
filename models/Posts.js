@@ -1,6 +1,12 @@
 const mongoose=require('mongoose')
 
 const postSchema=new mongoose.Schema({
+    postOwner:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'users'
+
+    },
+
     title:{
         type:String,
         required:true

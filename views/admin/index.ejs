@@ -13,6 +13,8 @@
  <th>Status</th>
   <th>Allow Comments</th>
   <th>Date</th>
+  <th>View Post</th>
+
 
 </tr>
 </thead>
@@ -39,6 +41,7 @@
   
      <td><%=post.allowComments%></td>
      <td><%=post.date.toDateString() %></td>
+     <td><a href="/user/post/<%=post._id%>">View</a></td>
 
      <td> <a class="btn btn-outline-primary" href="/admin/posts/edit/<%=post._id%>">Edit Post </a></td>
      <td> 
