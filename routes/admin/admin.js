@@ -24,7 +24,7 @@ router.get('/dashboard',ensureAuthenticated,(req,res)=>{
   })
 })
 
-
+// getting all comments
 router.get('/comment',(req,res)=>{
   //I want only comment by a specific user(logged in user)
   Comment.find({user:req.user._id})
@@ -40,7 +40,7 @@ router.get('/comment',(req,res)=>{
   })
 
 })
-
+// logging out the admin
 router.get('/logout',(req,res)=>{
   req.logOut()
   req.flash('success_msg','Successfully logged out,see you Soon!')
