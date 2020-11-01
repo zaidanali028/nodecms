@@ -21,9 +21,12 @@ router.get("/", (req, res) => {
     });
   });
 });
-router.get("/post/:id", (req, res) => {
-const { id } = req.params;
-  postSchema.findOne({ _id: id })
+
+//Before pretty urls,I used to do this with just id
+router.get("/post/:slug", (req, res) => {
+//const { id } = req.params;
+const {slug}=req.body
+  postSchema.findOne({ slug: slug })
   .populate('postOwner')
   ///?
   .populate({path:'comments',populate:{path:'user',model:'users'}})

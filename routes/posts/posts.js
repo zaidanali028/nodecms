@@ -2,46 +2,58 @@ const express = require("express");
 const Postschema = require("../../models/Posts");
 const router = express.Router();
 const faker = require("faker");
-const moment=require('moment')
-const path = require('path')
+const moment = require("moment");
+const path = require("path");
 //Schemas
 const postSchema = require("../../models/Posts");
-const Category= require("../../models/Category");
+const Category = require("../../models/Category");
 
 //Chedcking authentication
-const {ensureAuthenticated}=require('../../config/auth')
+const { ensureAuthenticated } = require("../../config/auth");
 
-
-router.get("/",ensureAuthenticated, (req, res) => {
-  
-  postSchema.find({})
-  //.lean() changes a mongoose object to a plain javascript object so I can use dot(.) notation on them
-.lean()
- .populate('category')
-   //You can get category collection without populating it but it wont be an object
-  //Inorder to make it an object and get its name to the user,
-  //I will have to populate its collection
-  .then((posts) => {
-    res.render("admin/index", {
-      allPosts: posts });
-  });
+router.get("/", ensureAuthenticated, (req, res) => {
+  postSchema
+    .find({})
+    //.lean() changes a mongoose object to a plain javascript object so I can use dot(.) notation on them
+    .lean()
+    .populate("category")
+    //You can get category collection without populating it but it wont be an object
+    //Inorder to make it an object and get its name to the user,
+    //I will have to populate its collection
+    .then((posts) => {
+      res.render("admin/index", {
+        allPosts: posts,
+      });
+    });
 });
 
-router.get("/create",ensureAuthenticated, (req, res) => {
+router.get("/user", ensureAuthenticated, (req, res) => {
+  postSchema
+    .find({postOwner:req.user._id})
+    .populate("category")
 
-  Category.find({}).lean().then(cateGories=>{
-    res.render("admin/createPosts",{cateGories});
-  })
-  
-
+    .then((posts) => {
+      res.render("admin/userpost", {
+        allPosts: posts,
+      });
+     
+      
+    });
 });
 
-router.post("/create", ensureAuthenticated,async (req, res) => {
-  
+router.get("/create", ensureAuthenticated, (req, res) => {
+  Category.find({})
+    .lean()
+    .then((cateGories) => {
+      res.render("admin/createPosts", { cateGories });
+    });
+});
+
+router.post("/create", ensureAuthenticated, async (req, res) => {
   let errors = [];
   const { title, status, description, category } = req.body;
   //console.log(category)
-  let {allowComments}=req.body
+  let { allowComments } = req.body;
 
   if (!title || !status || !description) {
     errors.push({ msg: "Please fill in All Fields" });
@@ -51,19 +63,16 @@ router.post("/create", ensureAuthenticated,async (req, res) => {
   }
 
   if (errors.length > 0) {
-
-    await Category.find({}).lean().then(cateGories=>{
-
-      return res.render("admin/createPosts", {
-        errors,
-        title,
-        description,
-        cateGories
+    await Category.find({})
+      .lean()
+      .then((cateGories) => {
+        return res.render("admin/createPosts", {
+          errors,
+          title,
+          description,
+          cateGories,
+        });
       });
-
-    })
-
-
   }
 
   function isEmpty(object) {
@@ -77,27 +86,25 @@ router.post("/create", ensureAuthenticated,async (req, res) => {
     return false;
   }
 
-  let fileName = '';
+  let fileName = "";
   if (isEmpty(req.files)) {
     const fileObject = req.files.uploader;
     fileName = new Date().getSeconds() + "-" + fileObject.name;
     //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
-    fileObject.mv('./public/uploads/' + fileName, (err) => {
-      if(err)  console.log(err);
+    fileObject.mv("./public/uploads/" + fileName, (err) => {
+      if (err) console.log(err);
       console.log("has something");
     });
-  }else{
+  } else {
     console.log("has nothing");
-
   }
 
   //handling allowComments(if is on,we will overwrite on with true and false otherwise)
-if(allowComments){
-  allowComments=true
-}else{
-  allowComments=false
-
-}
+  if (allowComments) {
+    allowComments = true;
+  } else {
+    allowComments = false;
+  }
 
   const newPost = new postSchema({
     title,
@@ -106,35 +113,34 @@ if(allowComments){
     allowComments,
     description,
     uploader: fileName,
-    postOwner:req.user._id
+    postOwner: req.user._id,
   });
   await newPost.save().then((newPostSaved) => {
     req.flash(
       "success_msg",
       `Successfully created post with title ${newPostSaved.title}`
     );
-    res.redirect("/admin/posts");
+    res.redirect("/admin/posts/user");
   });
 });
 
-router.get("/edit/:id",ensureAuthenticated, (req, res) => {
+router.get("/edit/:id", ensureAuthenticated, (req, res) => {
   const { id } = req.params;
   postSchema.findOne({ _id: id }).then((postFound) => {
-    Category.find({}).then(category=>{
-      res.render("admin/editPost",{gotPost: postFound,cateGories:category});
-     
-  
-  
-    })
- 
+    Category.find({}).then((category) => {
+      res.render("admin/editPost", {
+        gotPost: postFound,
+        cateGories: category,
+      });
+    });
   });
 });
 
-router.put("/edit/:id",ensureAuthenticated, (req, res) => {
+router.put("/edit/:id", ensureAuthenticated, (req, res) => {
   let errors = [];
   const { title, status, description } = req.body;
   let { allowComments } = req.body;
-  let category=req.body.category
+  let category = req.body.category;
   let { id } = req.params;
   if (!title || !status || !description) {
     errors.push({ msg: "Please fill in All Fields" });
@@ -191,64 +197,69 @@ router.put("/edit/:id",ensureAuthenticated, (req, res) => {
       $set: {
         title: title,
         uploader: fileName,
-        category:category,
+        category: category,
         status: status,
         allowcomments: allowComments,
         description: description,
-        postOwner:req.user._id
-
-      }
+        postOwner: req.user._id,
+      },
     }
   ).then((updatedPost) => {
     req.flash("success_msg", "Successfully Updated Your Post");
-    res.redirect("/admin/posts");
+    res.redirect("/admin/posts/user");
   });
 });
 
-router.delete("/delete/:id", ensureAuthenticated,(req, res) => {
+router.delete("/delete/:id", ensureAuthenticated, (req, res) => {
   const { id } = req.params;
-   postSchema.findOne({ _id: id }).populate('comments')
-  //I will like to delete the post I want to delete's comment too
-  //so i populated the 'comments on the found post'
-   
-   .then((thePosts) => {
-    // console.log(thePosts.comments)
-    //logged it.Is an array
-    if(thePosts.comments.length!=0){
-      // if the array is not empty
+  postSchema
+    .findOne({ _id: id })
+    .populate("comments")
+    //I will like to delete the post I want to delete's comment too
+    //so i populated the 'comments on the found post'
+
+    .then((thePosts) => {
       // console.log(thePosts.comments)
+      //logged it.Is an array
+      if (thePosts.comments.length != 0) {
+        // if the array is not empty
+        // console.log(thePosts.comments)
 
-      for(comment of thePosts.comments){
-        comment.remove()
+        for (comment of thePosts.comments) {
+          comment.remove();
+        }
       }
-
-    }
-    thePosts.remove();
-    req.flash('success_msg',`Successfully deleted post with id ${thePosts.id}`)
-    res.redirect("/admin/posts");
-  });
+      thePosts.remove();
+      req.flash(
+        "success_msg",
+        `Successfully deleted post with id ${thePosts.id}`
+      );
+      res.redirect("/admin/posts/user");
+    });
 });
 
 //dummpy data
-router.get("/dummy",ensureAuthenticated, (req, res) => {
+router.get("/dummy", ensureAuthenticated, (req, res) => {
   res.render("admin/allPosts");
 });
 
-router.post("/dummy",ensureAuthenticated, (req, res) => {
+router.post("/dummy", ensureAuthenticated, (req, res) => {
   for (let i = 0; i < req.body.amount; i++) {
     const fakePost = new postSchema({
       title: faker.name.title(),
       status: "private",
       allowComments: faker.random.boolean(),
       description: faker.lorem.sentences(),
-    
     });
     fakePost
       .save()
       .then((faked) => {
-    req.flash('success_msg',`Successfully auto posted ${req.body.amount} posts`)
+        req.flash(
+          "success_msg",
+          `Successfully auto posted ${req.body.amount} posts`
+        );
 
-        res.redirect("/admin/posts");
+        res.redirect("/admin/posts/user");
       })
       .catch((err) => {
         console.log(err);
@@ -256,7 +267,7 @@ router.post("/dummy",ensureAuthenticated, (req, res) => {
   }
 });
 
-router.delete("/clear",ensureAuthenticated, (req, res) => {
+router.delete("/clear", ensureAuthenticated, (req, res) => {
   //find{} finds all posts
   postSchema.find({}).then((allposts) => {
     //allposts are all posts in the database
@@ -267,9 +278,9 @@ router.delete("/clear",ensureAuthenticated, (req, res) => {
         gottenPost.remove();
       });
     }
-    req.flash('success_msg',`Successfully deleted all posts`)
+    req.flash("success_msg", `Successfully deleted all posts`);
 
-    res.redirect("/admin/posts");
+    res.redirect("/admin/posts/user");
   });
 });
 module.exports = router;

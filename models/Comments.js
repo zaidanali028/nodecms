@@ -13,7 +13,11 @@ const commentSchema = new mongoose.Schema({
   date:{
     type:Date,
     default:new Date
-  }
+  },
+approveComments:{
+  type:Boolean,
+  default:false
+}
 
  
 });

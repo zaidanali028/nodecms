@@ -40,6 +40,18 @@ router.get('/comment',(req,res)=>{
   })
 
 })
+
+router.get('/stats',(req,res)=>{
+  Post.count({}).then((numOfPosts)=>{
+    Comment.countDocuments({}).then((numOfComments)=>{
+      res.render('admin/stats',{numOfPosts,numOfComments})
+    })
+ 
+
+
+  })
+
+})
 // logging out the admin
 router.get('/logout',(req,res)=>{
   req.logOut()

@@ -1,5 +1,5 @@
 const mongoose=require('mongoose')
-
+const urlSlug=require('mongoose-url-slugs')
 const postSchema=new mongoose.Schema({
     postOwner:{
         type:mongoose.Schema.Types.ObjectId,
@@ -10,6 +10,9 @@ const postSchema=new mongoose.Schema({
     title:{
         type:String,
         required:true
+    },
+    slug:{
+        type:String
     },
     status:{
         type:String,
@@ -47,5 +50,7 @@ const postSchema=new mongoose.Schema({
 
 },{usePushEach:true})
 
-
+postSchema.plugin(urlSlug('title',{field:'slug'}))
+//Am extending the capability of the Schema by adding the slug plugin
+//on line 53, I am saving the post's title to the slug key
 module.exports=mongoose.model('currentPosts',postSchema)
